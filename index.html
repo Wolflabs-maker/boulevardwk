@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WOLFFY | Green Day A1 Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        spotGreen: '#1DB954',
+                        spotBlack: '#121212',
+                        spotDark: '#191414',
+                        wolfBlue: '#3d91f4',
+                        wolfGold: '#FFD700',
+                    },
+                    animation: {
+                        'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                        'shake': 'shake 0.4s cubic-bezier(.36,.07,.19,.97) both',
+                    },
+                    keyframes: {
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        shake: {
+                            '10%, 90%': { transform: 'translate3d(-1px, 0, 0)' },
+                            '20%, 80%': { transform: 'translate3d(2px, 0, 0)' },
+                            '30%, 50%, 70%': { transform: 'translate3d(-4px, 0, 0)' },
+                            '40%, 60%': { transform: 'translate3d(4px, 0, 0)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 28px;
+        }
+
+        .capsule {
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #888;
+            transition: all 0.3s;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .capsule.active {
+            background: #1DB954;
+            color: #000;
+            border-color: #1DB954;
+        }
+
+        .input-mission {
+            background: #2a2a2a;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            color: #fff;
+            padding: 16px;
+            font-weight: 700;
+            width: 100%;
+            outline: none;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            font-size: 16px; 
+            text-align: center;
+        }
+
+        .input-mission:focus {
+            background: #333;
+            border-color: #1DB954;
+        }
+
+        .btn-spotify {
+            background-color: #1DB954;
+            color: black;
+            font-weight: 900;
+            border-radius: 500px;
+            padding: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.2s;
+            width: 100%;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+
+        .btn-spotify:active { transform: scale(0.96); }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: #1DB954;
+            border-radius: 4px;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .reveal-box {
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px dashed #FFD700;
+            padding: 12px;
+            border-radius: 12px;
+            margin-top: 15px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 800;
+            color: #FFD700;
+            font-size: 14px;
+            display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    </style>
+</head>
+<body class="p-4 sm:p-6">
+
+    <!-- CÁPSULAS DE NAVEGAÇÃO -->
+    <div id="section-nav" class="flex gap-2 overflow-x-auto pb-4 no-scrollbar shrink-0">
+        <div class="capsule active" id="cap-0" onclick="switchSection(0)">Affirmative</div>
+        <div class="capsule" id="cap-1" onclick="switchSection(1)">Negative</div>
+        <div class="capsule" id="cap-2" onclick="switchSection(2)">Interrogative</div>
+    </div>
+
+    <!-- CABEÇALHO DE PROGRESSO -->
+    <div id="ui-header" class="mb-6 shrink-0">
+        <div class="flex justify-between items-center mb-2">
+            <span class="text-[10px] font-black text-spotGreen uppercase tracking-[0.2em]" id="track-info">Track 1 / 10</span>
+            <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest italic" id="section-label">Affirmative Mode</span>
+        </div>
+        <div class="h-1.5 w-full bg-white/10 rounded-full">
+            <div id="progress-fill" class="progress-bar-fill" style="width: 0%;"></div>
+        </div>
+    </div>
+
+    <!-- ENGINE DO JOGO -->
+    <div id="main-container" class="flex-1 flex flex-col">
+        
+        <!-- CARD DA QUESTÃO -->
+        <div id="quest-card" class="glass-card p-6 sm:p-8 flex flex-col justify-center relative overflow-hidden mb-6 min-h-[220px] animate-card">
+            <div class="flex justify-center mb-6">
+                <div id="mission-icon" class="w-14 h-14 bg-white/5 rounded-full flex items-center justify-center text-spotGreen text-2xl">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+            </div>
+            
+            <h2 id="prompt-text" class="text-xl sm:text-2xl font-bold leading-relaxed text-center text-gray-100 mb-4">
+                <!-- Injetado -->
+            </h2>
+            
+            <div id="feedback-msg" class="h-5 text-[10px] font-black uppercase text-center tracking-widest mb-2"></div>
+            
+            <div id="reveal-answer" class="reveal-box text-center">
+                <i class="fa-solid fa-eye mr-2"></i> REVEALED: <span id="revealed-text"></span>
+            </div>
+        </div>
+
+        <!-- ÁREA DE INPUT -->
+        <div id="input-group" class="space-y-4 mb-6">
+            <input type="text" id="ans1" class="input-mission" placeholder="TYPE THE MISSING PART" autocomplete="off" spellcheck="false">
+        </div>
+
+        <div class="mt-auto pb-4">
+            <button onclick="checkAnswer()" id="main-btn" class="btn-spotify">Verify Pattern</button>
+        </div>
+    </div>
+
+    <!-- TELA DE SUCESSO POR SEÇÃO -->
+    <div id="section-complete" class="hidden flex-1 flex flex-col items-center justify-center text-center">
+        <div class="w-24 h-24 bg-spotGreen rounded-full flex items-center justify-center text-black text-4xl mb-6 shadow-xl">
+            <i class="fa-solid fa-compact-disc animate-spin"></i>
+        </div>
+        <h1 class="text-3xl font-black mb-4 font-['Montserrat'] uppercase italic">Section Synced</h1>
+        <p class="text-gray-400 mb-10 italic text-sm">Você completou esta fase da missão. Pronto para o próximo desafio?</p>
+        <button onclick="nextSectionAuto()" class="btn-spotify">Next Track</button>
+    </div>
+
+    <!-- SUCESSO FINAL -->
+    <div id="end-screen" class="hidden flex-1 flex flex-col items-center justify-center text-center">
+        <div class="w-28 h-28 bg-spotGreen rounded-full flex items-center justify-center text-black text-5xl mb-8 shadow-[0_0_50px_rgba(29,185,84,0.4)]">
+            <i class="fa-solid fa-trophy"></i>
+        </div>
+        <h1 class="text-4xl font-black mb-4 font-['Montserrat'] uppercase italic">Boulevard Master</h1>
+        <p class="text-gray-400 mb-12 italic text-sm">Missão Completa. Você dominou o Present Simple em todas as formas.<br>Status: 100% Native Sync.</p>
+        <button onclick="location.reload()" class="btn-spotify !bg-white !text-black">Replay All</button>
+    </div>
+
+    <script>
+        const missionData = [
+            // AFFIRMATIVE (S, TO BE, LYRICS)
+            [
+                { q: "I ______ (walk) a lonely road.", a1: ["WALK"], icon: "fa-person-walking" },
+                { q: "Where the city ______ (sleep).", a1: ["SLEEPS"], icon: "fa-city" },
+                { q: "And I ______ (be) the only one.", a1: ["AM"], icon: "fa-user" },
+                { q: "My shadow ______ (be) the only thing that walks beside me.", a1: ["IS"], icon: "fa-ghost" },
+                { q: "I ______ (walk) this empty street.", a1: ["WALK"], icon: "fa-road" },
+                { q: "My shallow heart ______ (be) beating.", a1: ["IS"], icon: "fa-heart" },
+                { q: "Sometimes I ______ (wish) someone out there would find me.", a1: ["WISH"], icon: "fa-sun" },
+                { q: "Every step I ______ (take) is another mistake.", a1: ["TAKE"], icon: "fa-shoe-prints" },
+                { q: "It ______ (be) home to me.", a1: ["IS"], icon: "fa-house" },
+                { q: "On the Boulevard of Broken ______ (Dreams).", a1: ["DREAMS"], icon: "fa-cloud" }
+            ],
+            // NEGATIVE (DON'T, DOESN'T, ISN'T)
+            [
+                { q: "I ______ (not know) where it goes.", a1: ["DON'T KNOW", "DO NOT KNOW"], icon: "fa-circle-question" },
+                { q: "The city ______ (not sleep) at noon.", a1: ["DOESN'T SLEEP", "DOES NOT SLEEP"], icon: "fa-sun" },
+                { q: "I ______ (not be) alone today.", a1: ["AM NOT", "I'M NOT"], icon: "fa-users" },
+                { q: "My shadow ______ (not talk) to me.", a1: ["DOESN'T TALK", "DOES NOT TALK"], icon: "fa-comment-slash" },
+                { q: "We ______ (not walk) on the grass.", a1: ["DON'T WALK", "DO NOT WALK"], icon: "fa-ban" },
+                { q: "It ______ (not be) easy to walk alone.", a1: ["ISN'T", "IS NOT", "IT'S NOT"], icon: "fa-face-frown" },
+                { q: "They ______ (not have) a home.", a1: ["DON'T HAVE", "DO NOT HAVE"], icon: "fa-house-circle-xmark" },
+                { q: "The street ______ (not be) empty at night.", a1: ["ISN'T", "IS NOT"], icon: "fa-moon" },
+                { q: "Dreams ______ (not come) true without work.", a1: ["DON'T COME", "DO NOT COME"], icon: "fa-hourglass-end" },
+                { q: "I ______ (not be) lost, I'm just walking.", a1: ["AM NOT", "I'M NOT"], icon: "fa-map" }
+            ],
+            // INTERROGATIVE (DO/DOES, AM/IS/ARE)
+            [
+                { q: "______ you ______ (walk) a lonely road?", a1: ["DO YOU WALK"], icon: "fa-person-walking" },
+                { q: "______ the city ______ (sleep) now?", a1: ["DOES THE CITY SLEEP"], icon: "fa-bed" },
+                { q: "______ I ______ (be) the only one here?", a1: ["AM I"], icon: "fa-user-tag" },
+                { q: "______ it ______ (be) home to you?", a1: ["IS IT"], icon: "fa-door-open" },
+                { q: "Where ______ the road ______ (go)?", a1: ["DOES THE ROAD GO"], icon: "fa-compass" },
+                { q: "______ your heart ______ (beat) fast?", a1: ["IS YOUR HEART BEATING", "DOES YOUR HEART BEAT"], icon: "fa-heart-pulse" },
+                { q: "______ you ______ (wish) for a change?", a1: ["DO YOU WISH"], icon: "fa-wand-magic-sparkles" },
+                { q: "Who ______ ______ (walk) beside you?", a1: ["WHO WALKS", "WHO IS WALKING"], icon: "fa-people-group" },
+                { q: "______ the dreams ______ (be) broken?", a1: ["ARE THE DREAMS"], icon: "fa-heart-crack" },
+                { q: "Why ______ I ______ (walk) alone?", a1: ["WHY DO I WALK"], icon: "fa-circle-info" }
+            ]
+        ];
+
+        let currentSection = 0;
+        let currentIdx = 0;
+        let attemptsCount = 0;
+        let processing = false;
+
+        function switchSection(id) {
+            if (processing) return;
+            currentSection = id;
+            currentIdx = 0;
+            
+            // Update capsules
+            document.querySelectorAll('.capsule').forEach(c => c.classList.remove('active'));
+            document.getElementById(`cap-${id}`).classList.add('active');
+            
+            // UI Reset
+            document.getElementById('section-complete').classList.add('hidden');
+            document.getElementById('end-screen').classList.add('hidden');
+            document.getElementById('main-container').classList.remove('hidden');
+            document.getElementById('ui-header').classList.remove('hidden');
+
+            const labels = ["Affirmative Mode", "Negative Mode", "Interrogative Mode"];
+            document.getElementById('section-label').innerText = labels[id];
+            
+            loadQuest();
+        }
+
+        function loadQuest() {
+            const quest = missionData[currentSection][currentIdx];
+            const card = document.getElementById('quest-card');
+            const icon = document.getElementById('mission-icon');
+            const prompt = document.getElementById('prompt-text');
+            const fill = document.getElementById('progress-fill');
+            const info = document.getElementById('track-info');
+            const reveal = document.getElementById('reveal-answer');
+            
+            attemptsCount = 0;
+            reveal.style.display = "none";
+            card.classList.remove('animate-slide-up');
+            void card.offsetWidth;
+            card.classList.add('animate-slide-up');
+
+            prompt.innerHTML = quest.q.replace('______', '<span class="text-spotGreen">?</span>').replace('______', '<span class="text-wolfBlue">?</span>');
+            icon.innerHTML = `<i class="fa-solid ${quest.icon}"></i>`;
+            info.innerText = `Track ${currentIdx + 1} / 10`;
+            fill.style.width = `${((currentIdx) / 10) * 100}%`;
+
+            const inp1 = document.getElementById('ans1');
+            inp1.value = "";
+            inp1.disabled = false;
+            document.getElementById('feedback-msg').innerText = "";
+            document.getElementById('main-btn').disabled = false;
+            
+            inp1.focus();
+            processing = false;
+        }
+
+        function checkAnswer() {
+            if (processing) return;
+
+            const q = missionData[currentSection][currentIdx];
+            const v1 = document.getElementById('ans1').value.toUpperCase().trim();
+            const feedback = document.getElementById('feedback-msg');
+            const card = document.getElementById('quest-card');
+            const reveal = document.getElementById('reveal-answer');
+            const revealText = document.getElementById('revealed-text');
+
+            const clean = (s) => s.replace(/['’]/g, "").replace(/\s+/g, " ").trim();
+
+            const isCorrect = q.a1.some(valid => clean(v1) === clean(valid));
+
+            if (isCorrect) {
+                processing = true;
+                feedback.innerHTML = '<span class="text-spotGreen"><i class="fa-solid fa-circle-check mr-2"></i>SYNCHRONIZED</span>';
+                document.getElementById('ans1').disabled = true;
+                document.getElementById('main-btn').disabled = true;
+
+                setTimeout(() => {
+                    currentIdx++;
+                    if (currentIdx < 10) {
+                        loadQuest();
+                    } else {
+                        finishSection();
+                    }
+                }, 1000);
+            } else {
+                attemptsCount++;
+                card.classList.remove('animate-slide-up');
+                card.classList.add('animate-shake');
+                feedback.innerHTML = `<span class="text-red-500"><i class="fa-solid fa-triangle-exclamation mr-2"></i>DATA ERROR (${attemptsCount}/4)</span>`;
+                
+                if (attemptsCount >= 4) {
+                    reveal.style.display = "block";
+                    revealText.innerText = q.a1[0];
+                    feedback.innerHTML = '<span class="text-wolfGold">OVERRIDE ACTIVE</span>';
+                }
+
+                setTimeout(() => card.classList.remove('animate-shake'), 400);
+            }
+        }
+
+        function finishSection() {
+            document.getElementById('progress-fill').style.width = "100%";
+            if (currentSection < 2) {
+                document.getElementById('main-container').classList.add('hidden');
+                document.getElementById('section-complete').classList.remove('hidden');
+            } else {
+                document.getElementById('main-container').classList.add('hidden');
+                document.getElementById('ui-header').classList.add('hidden');
+                document.getElementById('end-screen').classList.remove('hidden');
+            }
+        }
+
+        function nextSectionAuto() {
+            switchSection(currentSection + 1);
+        }
+
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') checkAnswer();
+        });
+
+        // Init
+        setTimeout(() => switchSection(0), 100);
+    </script>
+</body>
+</html>
